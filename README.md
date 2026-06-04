@@ -1,34 +1,41 @@
-# tty 🔳
+# tty
 
-Small cross-platform Lua bindings for terminal inspection.
+[![LuaRocks](https://img.shields.io/luarocks/v/BlueLua/tty?color=blue&style=flat-square)](https://luarocks.org/modules/BlueLua/tty)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/BlueLua/tty/test.yml?style=flat-square)](https://github.com/BlueLua/tty/actions/workflows/test.yml)
+![Lua Versions](https://img.shields.io/badge/lua-5.1%20%7C%205.2%20%7C%205.3%20%7C%205.4%20%7C%205.5%20%7C%20LuaJIT-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/BlueLua/tty/blob/main/LICENSE)
 
-Supports Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
+`tty` provides lightweight, cross-platform C-backed Lua bindings for terminal
+detection and terminal size inspection.
 
-## Install
+Read the [documentation](https://bluelua.github.io/tty) to get started.
 
-```bash
+## ✨ Features
+
+- **TTY Verification**: Check if a Lua file handle (like `io.stdout`,
+  `io.stdin`), standard stream, or raw file descriptor is interactive.
+- **Window Dimension Query**: Retrieve the current width (columns) and height
+  (rows) of the active terminal dynamically.
+- **Multiple Lua Versions**: Compatible with LuaJIT, Lua 5.1, 5.2, 5.3, 5.4, and
+  5.5.
+
+## 📦 Installation
+
+```sh
 luarocks install tty
 ```
 
-## API
-
-### `isatty(fd?)` -> boolean
-
-Check whether a file descriptor or Lua file handle is attached to a terminal.
+## 🚀 Usage
 
 ```lua
 local tty = require "tty"
-print(tty.isatty())
-print(tty.isatty(2))
-print(tty.isatty(io.stdout))
-```
 
-### `size(fd?)` -> rows, cols
-
-Get the terminal size for stdout, or for a specific file descriptor or Lua file
-handle.
-
-```lua
-local rows, cols = tty.size()
-print(("terminal: %dx%d"):format(cols, rows))
+-- Check if standard output is a TTY
+if tty.isatty(io.stdout) then
+  local rows, cols = tty.size()
+  print(string.format("Terminal size: %dx%d", cols, rows))
+else
+  print("Output is redirected")
+end
 ```
