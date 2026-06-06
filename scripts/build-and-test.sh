@@ -25,7 +25,7 @@ run_for() {
   printf 'test %s\n' "$interp"
   (
     eval "$(luarocks --tree "$out_dir" --lua-version="$lua_version" path --no-bin)"
-    "$interp" "$ROOT/tests/tty.test.lua"
+    busted --lua="$interp"
   )
 }
 
