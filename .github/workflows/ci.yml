@@ -43,8 +43,8 @@ jobs:
     with:
       # Forward OS selections if triggered manually, otherwise use defaults for push/pr triggers
       linux: ${{ (github.event_name == 'workflow_dispatch' && inputs.linux == true) || (github.event_name != 'workflow_dispatch' && true) }}
-      macos: ${{ (github.event_name == 'workflow_dispatch' && inputs.macos == true) || (github.event_name != 'workflow_dispatch' && false) }}
-      windows: ${{ (github.event_name == 'workflow_dispatch' && inputs.windows == true) || (github.event_name != 'workflow_dispatch' && false) }}
+      macos: ${{ (github.event_name == 'workflow_dispatch' && inputs.macos == true) || (github.event_name != 'workflow_dispatch' && true) }}
+      windows: ${{ (github.event_name == 'workflow_dispatch' && inputs.windows == true) || (github.event_name != 'workflow_dispatch' && true) }}
 
       # Forward manual force-run triggers, otherwise default to false on push/pr (allowing auto-triggering)
       stylua: ${{ (github.event_name == 'workflow_dispatch' && inputs.stylua == true) || false }}
