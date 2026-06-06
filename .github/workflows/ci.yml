@@ -15,25 +15,25 @@ on:
       macos:
         description: "macOS"
         type: boolean
-        default: false
+        default: true
       windows:
         description: "Windows"
         type: boolean
-        default: false
+        default: true
       stylua:
-        description: "Force StyLua"
+        description: "StyLua"
         type: boolean
         default: false
       luacheck:
-        description: "Force Luacheck"
+        description: "Luacheck"
         type: boolean
         default: false
       prettier:
-        description: "Force Prettier"
+        description: "Prettier"
         type: boolean
         default: false
       tests:
-        description: "Force Tests"
+        description: "Tests"
         type: boolean
         default: false
 
