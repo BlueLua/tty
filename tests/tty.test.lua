@@ -2,130 +2,129 @@
 
 local tty = require "tty"
 
-local function fail(msg)
-  error(msg, 2)
-end
-
-local function assertEqual(actual, expected, msg)
-  if actual ~= expected then
-    fail(("%s: expected %s, got %s"):format(msg or "values differ", tostring(expected), tostring(actual)))
-  end
-end
-
-local function assertType(v, expectedType, msg)
-  if type(v) ~= expectedType then
-    fail(("%s: expected %s, got %s"):format(msg or "unexpected type", expectedType, type(v)))
-  end
-end
-
-local function assertErrorContains(fn, expected, msg)
-  local ok, err = pcall(fn)
-  if ok then
-    fail((msg or "expected error") .. ": call succeeded")
-  end
-
-  err = tostring(err)
-  if not err:find(expected, 1, true) then
-    fail(("%s: expected error containing %q, got %q"):format(msg or "wrong error", expected, err))
-  end
-end
-
-local function openTempFile()
-  local file = io.tmpfile()
-  if file then
-    return file, nil
-  end
-
+local function tempfile()
   local name = os.tmpname()
-  file = assert(io.open(name, "w+"))
+  local file = assert(io.open(name, "w+"))
   return file, name
 end
 
-local function closeTempFile(file, name)
-  if file then
-    pcall(function()
-      file:close()
+describe("tty", function()
+  it("should expose correct types", function()
+    assert.Table(tty)
+    assert.Function(tty.isatty)
+    assert.Function(tty.size)
+  end)
+
+  describe("isatty()", function()
+    it("defaults to stdout", function()
+      local stdout_is_tty = tty.isatty()
+      assert.Boolean(stdout_is_tty)
+      assert.Equal(stdout_is_tty, tty.isatty())
+      assert.Equal(stdout_is_tty, tty.isatty(1))
+      assert.Equal(stdout_is_tty, tty.isatty(io.stdout))
     end)
-  end
 
-  if name then
-    os.remove(name)
-  end
-end
+    it("should handle stderr", function()
+      local stderr_is_tty = tty.isatty(2)
+      assert.Boolean(stderr_is_tty)
+      assert.Equal(stderr_is_tty, tty.isatty(io.stderr))
+    end)
 
-assertType(tty, "table", "module")
-assertType(tty.isatty, "function", "tty.isatty")
-assertType(tty.size, "function", "tty.size")
+    it("should return false for a regular file handle", function()
+      local file, name = tempfile()
+      finally(function()
+        file:close()
+        os.remove(name)
+      end)
+      assert.False(tty.isatty(file))
+    end)
 
-local stdoutIsTTY = tty.isatty()
-assertType(stdoutIsTTY, "boolean", "tty.isatty()")
-assertEqual(tty.isatty(nil), stdoutIsTTY, "nil defaults to stdout")
-assertEqual(tty.isatty(1), stdoutIsTTY, "numeric stdout fd")
-assertEqual(tty.isatty(io.stdout), stdoutIsTTY, "stdout file handle")
+    it("should reject invalid arguments", function()
+      local err = "bad argument #1 to 'isatty' (expected a non-negative integer file descriptor or Lua file handle)"
 
-local stderrIsTTY = tty.isatty(2)
-assertType(stderrIsTTY, "boolean", "tty.isatty(2)")
-assertEqual(tty.isatty(io.stderr), stderrIsTTY, "stderr file handle")
+      -- stylua: ignore start
+      assert.Error(function() tty.isatty("1") end, err)
+      assert.Error(function() tty.isatty(-1)  end, err)
+      assert.Error(function() tty.isatty(1.5) end, err)
+      assert.Error(function() tty.isatty({})  end, err)
+      -- stylua: ignore end
 
-local temp, tempName = openTempFile()
-assertEqual(tty.isatty(temp), false, "regular file handle")
-assertErrorContains(function()
-  tty.size(temp)
-end, "failed to get terminal size", "regular file size")
-closeTempFile(temp, tempName)
+      assert.Error(function()
+        tty.isatty(1000000)
+      end, "tty.isatty: invalid file descriptor 1000000: Bad file descriptor")
+    end)
 
-if stdoutIsTTY then
-  local terminalRows, terminalCols = tty.size()
-  local nilRows, nilCols = tty.size(nil)
-  assertType(terminalRows, "number", "tty.size() rows")
-  assertType(terminalCols, "number", "tty.size() cols")
-  assertType(nilRows, "number", "tty.size(nil) rows")
-  assertType(nilCols, "number", "tty.size(nil) cols")
-  if terminalRows < 1 or terminalCols < 1 then
-    fail(("tty.size() returned invalid dimensions %s x %s"):format(tostring(terminalRows), tostring(terminalCols)))
-  end
-  if nilRows < 1 or nilCols < 1 then
-    fail(("tty.size(nil) returned invalid dimensions %s x %s"):format(tostring(nilRows), tostring(nilCols)))
-  end
-else
-  assertErrorContains(function()
-    tty.size()
-  end, "failed to get terminal size", "redirected stdout size")
-  assertErrorContains(function()
-    tty.size(nil)
-  end, "failed to get terminal size", "redirected nil size")
-end
+    it("should error when checking a closed file", function()
+      local file, name = tempfile()
+      file:close()
+      finally(function()
+        os.remove(name)
+      end)
+      assert.Error(function()
+        tty.isatty(file)
+      end, "bad argument #1 to 'isatty' (file handle is closed)")
+    end)
+  end)
 
-if stderrIsTTY then
-  local terminalRows, terminalCols = tty.size(io.stderr)
-  assertType(terminalRows, "number", "tty.size(io.stderr) rows")
-  assertType(terminalCols, "number", "tty.size(io.stderr) cols")
-  if terminalRows < 1 or terminalCols < 1 then
-    fail(
-      ("tty.size(io.stderr) returned invalid dimensions %s x %s"):format(tostring(terminalRows), tostring(terminalCols))
-    )
-  end
-else
-  assertErrorContains(function()
-    tty.size(io.stderr)
-  end, "failed to get terminal size", "redirected stderr size")
-end
+  describe("size()", function()
+    it("should return terminal size or error appropriately for stdout", function()
+      local stdout_is_tty = tty.isatty()
+      if stdout_is_tty then
+        local rows, cols = tty.size()
+        assert.Number(rows)
+        assert.Number(cols)
+        assert.True(rows >= 1)
+        assert.True(cols >= 1)
+      else
+        assert.Error(function()
+          tty.size()
+        end, "tty.size: failed to get terminal size for fd 1: Inappropriate ioctl for device")
+      end
+    end)
 
--- stylua: ignore start
-assertErrorContains(function() tty.isatty("1")     end, "file descriptor", "string fd")
-assertErrorContains(function() tty.isatty(-1)      end, "file descriptor", "negative fd")
-assertErrorContains(function() tty.isatty(1.5)     end, "file descriptor", "fractional fd")
-assertErrorContains(function() tty.isatty({})      end, "file descriptor", "table fd")
-assertErrorContains(function() tty.isatty(1000000) end, "invalid file descriptor", "invalid numeric fd")
-assertErrorContains(function() tty.size(1000000)  end, "invalid file descriptor", "invalid numeric size fd")
+    it("should return terminal size or error appropriately for stderr", function()
+      local stderr_is_tty = tty.isatty(2)
+      if stderr_is_tty then
+        local terminal_rows, terminal_cols = tty.size(io.stderr)
+        assert.Number(terminal_rows)
+        assert.Number(terminal_cols)
+        assert.True(terminal_rows >= 1)
+        assert.True(terminal_cols >= 1)
+      else
+        assert.Error(function()
+          tty.size(io.stderr)
+        end, "tty.size: failed to get terminal size for fd 2: Inappropriate ioctl for device")
+      end
+    end)
 
-local closed, closedName = openTempFile()
-closed:close()
-assertErrorContains(function() tty.isatty(closed) end, "closed", "closed file isatty")
-assertErrorContains(function() tty.size(closed)  end, "closed", "closed file size")
-if closedName then
-  os.remove(closedName)
-end
--- stylua: ignore end
+    it("should error for a regular file handle", function()
+      local file, name = tempfile()
+      finally(function()
+        file:close()
+        os.remove(name)
+      end)
+      assert.Error(function()
+        tty.size(file)
+      end, "tty.size: failed to get terminal size for fd 3: Inappropriate ioctl for device")
+    end)
 
-print("tty tests passed")
+    it("should reject invalid numeric file descriptors", function()
+      assert.Error(function()
+        tty.size(1000000)
+      end, "tty.size: invalid file descriptor 1000000: Bad file descriptor")
+    end)
+
+    it("should error when querying size of a closed file", function()
+      local closed, closed_name = tempfile()
+      closed:close()
+      finally(function()
+        if closed_name then
+          os.remove(closed_name)
+        end
+      end)
+      assert.Error(function()
+        tty.size(closed)
+      end, "bad argument #1 to 'size' (file handle is closed)")
+    end)
+  end)
+end)
