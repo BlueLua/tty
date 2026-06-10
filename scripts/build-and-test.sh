@@ -5,7 +5,7 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BUILD_ROOT=${BUILD_ROOT:-"$ROOT/build"}
-ROCKSPEC="$ROOT/rockspecs/tty-scm-1.rockspec"
+ROCKSPEC="$ROOT/tty-scm-1.rockspec"
 
 run_for() {
   interp=$1
