@@ -2,11 +2,15 @@
 
 ---@alias tty.fd integer|file* A file descriptor number or a Lua file handle.
 
+local version = "tty 0.0.0" -- x-release-please-version
+
 ---
 ---Terminal helpers for checking TTY state and reading terminal dimensions.
 ---
 ---@class tty
-local M = {}
+local M = {
+  _VERSION = version,
+}
 
 ---
 ---Check whether a file descriptor or Lua file handle is attached to a terminal.

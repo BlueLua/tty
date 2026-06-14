@@ -13,6 +13,7 @@ describe("tty", function()
     assert.Table(tty)
     assert.Function(tty.isatty)
     assert.Function(tty.size)
+    assert.String(tty._VERSION)
   end)
 
   describe("isatty()", function()

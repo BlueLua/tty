@@ -388,5 +388,7 @@ static const luaL_Reg tty_functions[] = {
 
 LUALIB_API int luaopen_tty(lua_State *L) {
   tty_lua_newlib(L, tty_functions);
+  lua_pushliteral(L, "tty 0.0.0"); /* x-release-please-version */
+  lua_setfield(L, -2, "_VERSION");
   return 1;
 }
