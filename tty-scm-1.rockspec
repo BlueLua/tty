@@ -19,5 +19,6 @@ build = {
     tty = {
       sources = { "src/tty.c" },
     },
+    ["tty.types/tty"] = "types/tty.d.lua",
   },
 }
