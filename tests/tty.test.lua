@@ -1,5 +1,3 @@
----@diagnostic disable: param-type-mismatch, discard-returns
-
 local tty = require "tty"
 
 local function tempfile()
@@ -44,14 +42,17 @@ describe("tty", function()
       local err = "bad argument #1 to 'isatty' (expected a non-negative integer file descriptor or Lua file handle)"
 
       -- stylua: ignore start
-      assert.Error(function() tty.isatty("1") end, err)
-      assert.Error(function() tty.isatty(-1)  end, err)
-      assert.Error(function() tty.isatty(1.5) end, err)
-      assert.Error(function() tty.isatty({})  end, err)
+      ---@diagnostic disable-next-line: param-type-mismatch
+      assert.Error(function() _ = tty.isatty("1") end, err)
+      assert.Error(function() _ = tty.isatty(-1)  end, err)
+      assert.Error(function() _ = tty.isatty(1.5) end, err)
+      assert.Error(function() _ = tty.isatty({})  end, err)
       -- stylua: ignore end
 
+      ---@diagnostic disable-next-line: undefined-field
       assert.Throw(function()
-        tty.isatty(1000000)
+        _ = tty.isatty(1000000)
+        ---@diagnostic disable: param-type-mismatch, discard-returns
       end, "invalid file descriptor")
     end)
 
@@ -61,6 +62,8 @@ describe("tty", function()
       finally(function()
         os.remove(name)
       end)
+
+      ---@diagnostic disable-next-line: undefined-field
       assert.Throw(function()
         tty.isatty(file)
       end, "closed")
@@ -77,6 +80,7 @@ describe("tty", function()
         assert.True(rows >= 1)
         assert.True(cols >= 1)
       else
+        ---@diagnostic disable-next-line: undefined-field
         assert.Throw(function()
           tty.size()
         end, "failed to get terminal size")
@@ -92,6 +96,7 @@ describe("tty", function()
         assert.True(terminal_rows >= 1)
         assert.True(terminal_cols >= 1)
       else
+        ---@diagnostic disable-next-line: undefined-field
         assert.Throw(function()
           tty.size(io.stderr)
         end, "failed to get terminal size")
@@ -104,12 +109,15 @@ describe("tty", function()
         file:close()
         os.remove(name)
       end)
+
+      ---@diagnostic disable-next-line: undefined-field
       assert.Throw(function()
         tty.size(file)
       end, "failed to get terminal size")
     end)
 
     it("should reject invalid numeric file descriptors", function()
+      ---@diagnostic disable-next-line: undefined-field
       assert.Throw(function()
         tty.size(1000000)
       end, "invalid file descriptor")
@@ -123,6 +131,8 @@ describe("tty", function()
           os.remove(closed_name)
         end
       end)
+
+      ---@diagnostic disable-next-line: undefined-field
       assert.Throw(function()
         tty.size(closed)
       end, "closed")
