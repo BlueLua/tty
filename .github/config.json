@@ -1,5 +1,5 @@
 {
   "package": "tty",
-  "os": ["linux"],
-  "version-files": []
+  "os": ["linux", "macos", "windows"],
+  "version-files": ["src/tty.c", "types/tty.d.lua"]
 }
