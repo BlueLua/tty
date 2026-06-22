@@ -1,24 +1,4 @@
-local luassert = require "luassert"
-local say = require "say"
-
-local function throw(_, args)
-  local fn = args[1]
-  local pattern = args[2]
-  local ok, err = pcall(fn)
-  if ok then
-    err = "no error"
-  else
-    err = tostring(err):gsub("^.-:%d+: ", "")
-  end
-  args[1] = pattern
-  args[2] = err
-  return not ok and err:find(pattern, 1, true) ~= nil
-end
-
-say:set("assertion.throw.positive", "Expected error containing %s, but caught %s")
-say:set("assertion.throw.negative", "Expected no error containing %s, but caught %s")
-
-luassert:register("assertion", "throw", throw, "assertion.throw.positive", "assertion.throw.negative")
+rawset(_G, "_TEST", true)
 
 return {
   _all = {

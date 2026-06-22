@@ -1,6 +1,16 @@
-build/
-*.rock
+# Compilation Artifacts (C Extensions)
 *.o
+*.a
 *.so
-*.dll
 *.dylib
+*.dll
+*.lib
+build/
+
+# LuaRocks & Package Managers
+*.rock
+
+# Editor and OS Specific
+.DS_Store
+.vscode/
+*.swp

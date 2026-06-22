@@ -16,8 +16,10 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    tty = {
-      sources = { "src/tty.c" },
+    ["tty"] = {
+      sources = {
+        "src/tty.c",
+      },
     },
     ["tty.types/tty"] = "types/tty.d.lua",
   },

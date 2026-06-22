@@ -1,9 +1,9 @@
 {
-  "release-type": "simple",
-  "initial-version": "0.1.0",
   "packages": {
     ".": {
-      "extra-files": ["src/tty.c", "types/tty.d.lua"]
+      "release-type": "simple",
+      "initial-version": "0.1.0",
+      "extra-files": []
     }
   }
 }

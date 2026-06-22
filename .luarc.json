@@ -1,8 +1,8 @@
 {
   "workspace": {
     "library": [
-      "~/.local/share/lua/types/busted/library",
-      "~/.local/share/lua/types/luassert/library",
+      "~/.local/share/lua/types/busted",
+      "~/.local/share/lua/types/luassert"
     ]
   }
 }
