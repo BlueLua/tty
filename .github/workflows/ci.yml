@@ -8,8 +8,16 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      test:
-        description: "Test"
+      test-linux:
+        description: "Test on Linux"
+        type: boolean
+        default: true
+      test-macos:
+        description: "Test on macOS"
+        type: boolean
+        default: true
+      test-windows:
+        description: "Test on Windows"
         type: boolean
         default: true
       luacheck:
@@ -46,7 +54,9 @@ jobs:
     uses: BlueLua/.github/.github/workflows/ci.yml@main
     secrets: inherit
     with:
-      test-linux: ${{ github.event_name == 'workflow_dispatch' && inputs.test || true }}
+      test-linux: ${{ github.event_name == 'workflow_dispatch' && inputs.test-linux || true }}
+      test-macos: ${{ github.event_name == 'workflow_dispatch' && inputs.test-macos || true }}
+      test-windows: ${{ github.event_name == 'workflow_dispatch' && inputs.test-windows || true }}
 
       luacheck: ${{ inputs.luacheck || false }}
       lua-language-server: ${{ inputs.lua-language-server || false }}
