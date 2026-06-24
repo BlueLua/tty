@@ -9,6 +9,8 @@
 Lightweight, cross-platform C-backed Lua bindings for terminal detection and
 terminal size inspection.
 
+Check out the [documentation] for guides and examples.
+
 ## ✨ Features
 
 - **TTY Verification**: Check if a Lua file handle, standard stream, or raw file
@@ -38,3 +40,5 @@ else
 print("Output is redirected")
 end
 ```
+
+[documentation]: https://bluelua.github.io/tty
