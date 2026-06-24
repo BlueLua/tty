@@ -1,5 +1,11 @@
 {
   "package": "tty",
   "os": ["linux", "macos", "windows"],
-  "version-files": ["src/tty.c", "types/tty.d.lua"]
+  "version-files": ["src/tty.c", "types/tty.d.lua"],
+  "desc": "Lightweight, cross-platform C-backed Lua bindings for terminal detection and terminal size inspection.",
+  "usage": "-- Check if standard output is a TTY\nif tty.isatty(io.stdout) then\n  local rows,cols = tty.size()\n  print(string.format(\"Terminal size: %dx%d\", cols, rows))\nelse\nprint(\"Output is redirected\")\nend",
+  "features": [
+    "**TTY Verification**: Check if a Lua file handle, standard stream, or raw file descriptor is interactive.",
+    "**Window Dimension Query**: Retrieve the current terminal width (columns) and height(rows) dynamically."
+  ]
 }
